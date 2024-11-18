@@ -223,9 +223,9 @@ class DrawCanvas extends React.PureComponent {
                 });
                 if (el.startsWith('Poly')) {
                     if (el.includes('ROI')) {
-                        this.tool.fillGeometry(elPoints, 'rgba(255, 0, 0, .1)');
-                    } else if (el.includes('ROD')) {
                         this.tool.fillGeometry(elPoints, 'rgba(0, 255, 0, .1)');
+                    } else if (el.includes('ROD')) {
+                        this.tool.fillGeometry(elPoints, 'rgba(255, 0, 0, .1)');
                     } else {
                         this.tool.fillGeometry(elPoints, this.props.polygonFillColor);
                     }

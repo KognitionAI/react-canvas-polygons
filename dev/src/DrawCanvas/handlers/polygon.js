@@ -10,7 +10,8 @@ polygon.onMouseDown = function onMouseDown(start, options) {
         this.state = {
             ...this.state,
             initialCircle: this.createStartPoint(start, 5),
-            startPoint: start
+            startPoint: start,
+            polygonFillColor: options.polygonFillColor
         };
     }
     if (!this.state.pathData) {
@@ -31,7 +32,7 @@ polygon.onMouseMove = function onMouseMove(position, callback) {
         && this.state.canvasData.length > 0 && this.state.pathData.length >= 3) {
             // the idea is to reconstructed the path using this.state.pathData here
             // so we can fill it out.
-            this.fillGeometry(this.state.pathData);
+            this.fillGeometry(this.state.pathData, this.state.polygonFillColor);
             this.resetState();
             // This callback is just to
             // sinalize we finish to draw and
@@ -41,7 +42,7 @@ polygon.onMouseMove = function onMouseMove(position, callback) {
     }
 }
 
-polygon.fillGeometry = function fillGeometry (pathData) {
+polygon.fillGeometry = function fillGeometry (pathData, polygonFillColor) {
     const path = new Path2D();
     const startPoint = pathData[0][0];
     path.moveTo(startPoint[0], startPoint[1]);
@@ -52,7 +53,7 @@ polygon.fillGeometry = function fillGeometry (pathData) {
             path.lineTo(pathData[0][0], pathData[0][1]);
         }
     });
-    this.ctx.fillStyle = 'rgba(255, 0, 0, 0.1)';
+    this.ctx.fillStyle = polygonFillColor;
     this.ctx.fill(path);
 }
 

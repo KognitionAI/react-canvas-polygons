@@ -70,13 +70,84 @@ line.drawCrossDirection = function (points, pixelDistance) {
     const y1 = points[0][1];
     const y2 = points[1][1];
 
-    const xCoord = ((x1 + x2) / 2) + (pixelDistance * Math.sign(y2 - y1));
-    const yCoord = ((y1 + y2) / 2) - (pixelDistance * Math.sign(x2 - x1));
+    // Calculate perpendicular angle (90 degrees = PI/2)
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    const perpAngle = angle + Math.PI / 2;
+    const arrowLength = 10;
+    const arrowWidth = Math.PI / 6; // 30 degrees
+    const labelOffset = 12; // Reduced from 15 to bring labels even closer
+    const lineLength = 20;
 
-    const crossPath = getCrossPath({x: xCoord, y: yCoord }, 6);
-    this.ctx.strokeStyle = '#ff0000';
-    this.ctx.stroke(crossPath);
-    this.ctx.strokeStyle = '#000';
+    // Draw "enter" arrow at start point (pointing down)
+    const enterPath = new Path2D();
+    const enterX = x1  + lineLength * Math.cos(perpAngle);
+    const enterY = y1 + lineLength * Math.sin(perpAngle);
+    
+    // Draw enter arrow line
+    enterPath.moveTo(x1, y1);
+    enterPath.lineTo(enterX, enterY);
+
+    // Draw enter arrowhead as filled triangle
+    const enterArrow = new Path2D();
+    enterArrow.moveTo(enterX + 5 * Math.cos(perpAngle), enterY + 5 * Math.sin(perpAngle));
+    enterArrow.lineTo(
+        enterX - arrowLength * Math.cos(perpAngle - arrowWidth) + 5 * Math.cos(perpAngle),
+        enterY - arrowLength * Math.sin(perpAngle - arrowWidth) + 5 * Math.sin(perpAngle)
+    );
+    enterArrow.lineTo(
+        enterX - arrowLength * Math.cos(perpAngle + arrowWidth) + 5 * Math.cos(perpAngle),
+        enterY - arrowLength * Math.sin(perpAngle + arrowWidth) + 5 * Math.sin(perpAngle)
+    );
+    enterArrow.closePath();
+
+    // Draw "exit" arrow at end point (pointing up)
+    const exitPath = new Path2D();
+    const exitX = x2 - lineLength * Math.cos(perpAngle);
+    const exitY = y2 - lineLength * Math.sin(perpAngle);
+    
+    // Draw exit arrow line
+    exitPath.moveTo(x2, y2);
+    exitPath.lineTo(exitX, exitY);
+
+    // Draw exit arrowhead as filled triangle
+    const exitArrow = new Path2D();
+    exitArrow.moveTo(exitX - 5 * Math.cos(perpAngle), exitY - 5 * Math.sin(perpAngle));
+    exitArrow.lineTo(
+        exitX + arrowLength * Math.cos(perpAngle - arrowWidth) - 5 * Math.cos(perpAngle),
+        exitY + arrowLength * Math.sin(perpAngle - arrowWidth) - 5 * Math.sin(perpAngle)
+    );
+    exitArrow.lineTo(
+        exitX + arrowLength * Math.cos(perpAngle + arrowWidth) - 5 * Math.cos(perpAngle),
+        exitY + arrowLength * Math.sin(perpAngle + arrowWidth) - 5 * Math.sin(perpAngle)
+    );
+    exitArrow.closePath();
+
+    // Draw arrow lines separately
+    this.ctx.stroke(enterPath);
+    this.ctx.stroke(exitPath);
+
+    // Fill enter arrowhead (green)
+    this.ctx.fillStyle = '#008000'; // Green
+    this.ctx.fill(enterArrow);
+
+    // Fill exit arrowhead (red)
+    this.ctx.fillStyle = '#FF0000'; // Red
+    this.ctx.fill(exitArrow);
+
+    // Add labels
+    this.ctx.font = '12px Arial';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillStyle = '#000'; // Keep text black
+    
+    // Position labels perpendicular to arrows
+    this.ctx.fillText('enter', 
+        enterX + (labelOffset + 5) * Math.cos(perpAngle),
+        enterY + (labelOffset + 5) * Math.sin(perpAngle)
+    );
+    this.ctx.fillText('exit',
+        exitX - labelOffset * Math.cos(perpAngle),
+        exitY - labelOffset * Math.sin(perpAngle)
+    );
 }
 
 export default line;

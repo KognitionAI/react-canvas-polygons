@@ -31,6 +31,7 @@ class DrawCanvas extends React.PureComponent {
         canvasData: [],
         polygonId: canvasHandler.uuid(),
         rectangleId: canvasHandler.uuid(),
+        polygonFillColor: this.props.polygonFillColor,
     }
 
     componentDidMount() {
@@ -55,7 +56,7 @@ class DrawCanvas extends React.PureComponent {
 
     onMouseDown = (e) => {
         if (this.tool) {
-            const { brushSize, color } = this.props;
+            const { brushSize, color, polygonFillColor } = this.props;
             const { tool } = this.props;
             const { polygonId, rectangleId } = this.state;
             if (tool !== 'Line') {
@@ -63,7 +64,12 @@ class DrawCanvas extends React.PureComponent {
             }
             const key = tool === 'Line' ? 'Line' : tool === 'Polygon' ? `Polygon_${polygonId}` : `Rectangle_${rectangleId}`;
             this.setState({ currentKey: key });
-            this.tool.onMouseDown(this.getCursorPosition(e), { brushSize, color, tool });
+            this.tool.onMouseDown(this.getCursorPosition(e), { 
+                brushSize, 
+                color, 
+                tool,
+                polygonFillColor
+            });
         }
     }
 
@@ -216,7 +222,13 @@ class DrawCanvas extends React.PureComponent {
                     }
                 });
                 if (el.startsWith('Poly')) {
-                    this.tool.fillGeometry(elPoints);
+                    if (el.includes('ROI')) {
+                        this.tool.fillGeometry(elPoints, 'rgba(255, 0, 0, .1)');
+                    } else if (el.includes('ROD')) {
+                        this.tool.fillGeometry(elPoints, 'rgba(0, 255, 0, .1)');
+                    } else {
+                        this.tool.fillGeometry(elPoints, this.props.polygonFillColor);
+                    }
                 }
             }
         });
@@ -292,7 +304,11 @@ DrawCanvas.propTypes = {
      * This is a callback function what we be triggered
      * when the shape is drawn
      */
-    onFinishDraw: type.func
+    onFinishDraw: type.func,
+    /**
+     * Polygon fill color
+     */
+    polygonFillColor: type.string,
 }
 
 DrawCanvas.defaultProps = {
